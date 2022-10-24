@@ -5,21 +5,44 @@ using UnityEngine;
 public class LineManager : MonoBehaviour
 {
     [SerializeField] private Camera _camera;
-    [SerializeField] private GameObject _linePrefab;
+    [SerializeField] private Line _linePrefab;
+
+    private List<GameObject> _lines = new List<GameObject>();
 
     private Line _currentLine;
-    // Start is called before the first frame update
-    void Start()
-    {
 
+    private bool _canEdit;
+
+    private void OnEnable()
+    {
+        GameManager.instance.OnChangeState += OnChangeGameState;
+    }
+    private void OnDisable()
+    {
+        GameManager.instance.OnChangeState -= OnChangeGameState;
     }
 
-    // Update is called once per frame
+    private void OnChangeGameState(GameState newState)
+    {
+        _canEdit = newState == GameState.Edit;
+        if (newState == GameState.Reset)
+        {
+            for (int i = 0; i < _lines.Count; i++)
+            {
+                Destroy(_lines[i]);
+            }
+            _lines = new List<GameObject>();
+        }
+    }
+
     void Update()
     {
+        if (!_canEdit)
+            return;
         if (Input.GetMouseButtonDown(0))
         {
-            _currentLine = Instantiate(_linePrefab, Vector3.zero, Quaternion.identity).GetComponent<Line>();
+            _currentLine = Instantiate(_linePrefab, Vector3.zero, Quaternion.identity);
+            _lines.Add(_currentLine.gameObject);
         }
         if (Input.GetMouseButton(0))
         {
