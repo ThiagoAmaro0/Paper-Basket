@@ -9,8 +9,8 @@ public class MenuManager : MonoBehaviour
         GameManager.instance.level = level;
         SceneHandler.instance.LoadScene("BaseLevel");
     }
-    public void BackToMenu()
+    public void LoadScene(string name)
     {
-        SceneHandler.instance.LoadScene("Menu");
+        SceneHandler.instance.LoadScene(name);
     }
 }
