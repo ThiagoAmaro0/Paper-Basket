@@ -10,18 +10,30 @@ public class GameManager : MonoBehaviour
     private GameState _prevState;
     //Singleton Pattern
     public static GameManager instance;
+    public int level;
 
     //Observer Pattern
     public Action<GameState> OnChangeState;
     // Start is called before the first frame update
     void Awake()
     {
-        instance = this;
+        if (instance)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            DontDestroyOnLoad(gameObject);
+            level = 1;
+            instance = this;
+        }
+
     }
 
     private void Start()
     {
-        SetState(GameState.Edit);
+        // sceneHandler.LoadAssync("Level" + level);
+        SetState(GameState.Menu);
     }
 
     public void SetState(GameState newState)
@@ -35,6 +47,15 @@ public class GameManager : MonoBehaviour
         {
             SetState(GameState.Edit);
         }
+        else if (newState == GameState.LoadLevel)
+        {
+            SceneHandler.instance.LoadAsync("Level" + GameManager.instance.level, LoadDone);
+        }
+        else if (newState == GameState.Victory)
+        {
+            if (PlayerPrefs.GetInt("HighLevel") < level)
+                PlayerPrefs.SetInt("HighLevel", level);
+        }
         else
         {
             _prevState = _currentState;
@@ -42,15 +63,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void LoadDone(AsyncOperation obj)
+    {
+        SetState(GameState.Reset);
+    }
 }
 
 public enum GameState
 {
+    Menu,
+    LevelSelect,
+    LoadLevel,
     Reset,
     Edit,
     Running,
     Victory,
     Lose,
     Pause,
-    Resume
+    Resume,
 }

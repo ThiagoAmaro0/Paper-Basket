@@ -7,9 +7,9 @@ using UnityEngine.UI;
 public class HUDManager : MonoBehaviour
 {
     [SerializeField] private GameObject _runButton;
-    [SerializeField] private GameObject _stopButton;
     [SerializeField] private GameObject _victoryPanel;
     [SerializeField] private GameObject _losePanel;
+    [SerializeField] private GameObject _gameOverPanel;
     [SerializeField] private GameObject _pausePanel;
     // Start is called before the first frame update
     private void OnEnable()
@@ -25,11 +25,27 @@ public class HUDManager : MonoBehaviour
     private void OnChangeGameState(GameState newState)
     {
         _runButton.SetActive(newState == GameState.Edit);
-        _stopButton.SetActive(newState == GameState.Running);
 
-        _victoryPanel.SetActive(newState == GameState.Victory);
         _losePanel.SetActive(newState == GameState.Lose);
         _pausePanel.SetActive(newState == GameState.Pause);
+        if (newState == GameState.Victory)
+        {
+            if (SceneHandler.instance.SceneExist("Level" + (GameManager.instance.level + 1)))
+            {
+                _gameOverPanel.SetActive(false);
+                _victoryPanel.SetActive(true);
+            }
+            else
+            {
+                _gameOverPanel.SetActive(true);
+                _victoryPanel.SetActive(false);
+            }
+        }
+        else
+        {
+            _gameOverPanel.SetActive(false);
+            _victoryPanel.SetActive(false);
+        }
     }
 
     public void RunButton()
@@ -47,5 +63,15 @@ public class HUDManager : MonoBehaviour
     public void ResetButton()
     {
         GameManager.instance.SetState(GameState.Reset);
+    }
+    public void NextLevel()
+    {
+        SceneHandler.instance.UnLoadScene("Level" + GameManager.instance.level);
+        GameManager.instance.level++;
+        GameManager.instance.SetState(GameState.LoadLevel);
+    }
+    public void MenuButton()
+    {
+        SceneHandler.instance.LoadScene("Menu");
     }
 }
